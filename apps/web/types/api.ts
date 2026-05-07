@@ -19,6 +19,7 @@ export type Article = {
   summary?: string | null;
   publishedAt: string;
   originalUrl: string;
+  imageUrl?: string | null;
   source: { name: string; homepageUrl: string };
   categories: { name: string }[];
   tags: { name: string }[];
@@ -45,6 +46,13 @@ export type HomeStats = {
     errorCount: number;
   } | null;
   sources: { name: string }[];
+  barometer?: {
+    score: number;
+    level: string;
+    weightedSignal: number;
+    articleCount: number;
+    topSignals: { label: string; weight: number }[];
+  };
 };
 
 export type TimelinePoint = {

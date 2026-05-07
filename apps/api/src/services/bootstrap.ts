@@ -11,12 +11,18 @@ const defaultSources = [
   { name: "Telex", homepageUrl: "https://telex.hu", feedUrl: "https://telex.hu/rss", type: SourceType.RSS },
   { name: "444", homepageUrl: "https://444.hu", feedUrl: "https://444.hu/feed/", type: SourceType.RSS },
   { name: "24.hu Belfold", homepageUrl: "https://24.hu", feedUrl: "https://24.hu/belfold/feed/", type: SourceType.RSS },
-  { name: "Kontroll.hu", homepageUrl: "https://kontroll.hu", feedUrl: "https://kontroll.hu/", type: SourceType.API },
   {
     name: "Google News - NER bukás",
     homepageUrl: "https://news.google.com",
     feedUrl: "https://news.google.com/rss/search?q=NER%20buk%C3%A1s%20OR%20korrupci%C3%B3%20OR%20Bal%C3%A1sy%20OR%20Fidesz&hl=hu&gl=HU&ceid=HU:hu",
     type: SourceType.GOOGLE_NEWS_RSS
+  },
+  {
+    name: "Reddit r/hungary - NER figyelő",
+    homepageUrl: "https://www.reddit.com/r/hungary/",
+    feedUrl:
+      "https://www.reddit.com/r/hungary/search.rss?q=NER%20OR%20Orb%C3%A1n%20OR%20Rog%C3%A1n%20OR%20korrupci%C3%B3%20OR%20k%C3%B6zbeszerz%C3%A9s%20OR%20EU%20p%C3%A9nzek%20OR%20propaganda%20OR%20%C3%A1llami%20tender&restrict_sr=on&sort=new&t=month",
+    type: SourceType.RSS
   }
 ];
 
@@ -30,58 +36,16 @@ Return strict JSON only:
 }
 Use only the title and RSS snippet. Never invent facts not supported by the input. Never start the summary with "Források szerint az ügy lényege". Use only these categories: NER bukás, EU pénzek, korrupció, állami tender, propaganda.`;
 
-const demoArticles = [
-  {
-    title: "Konkrét példán mutatta be egy állami cég vezetője, hogy hatszoros áron dolgoztak Balásyék",
-    summary: "A hír állami megbízások árazását és a kormányközeli kommunikációs piac működését érinti. A történet a közpénzek felhasználása és az elszámoltatás miatt került fókuszba.",
-    sourceName: "Kontroll.hu",
-    originalUrl: "https://kontroll.hu/cikk/belfold/2026/05/06/konkret-peldan-mutatta-be-egy-allami-ceg-vezetoje-hogy-hatszoros-aron-dolgoztak-balasyek",
-    publishedAt: new Date("2026-05-06T08:00:00.000Z"),
-    categories: ["állami tender", "propaganda", "NER bukás"],
-    tags: ["Balásy", "közpénz", "állami cég"],
-    persons: ["Balásy Gyula"]
-  },
-  {
-    title: "Balásy-féle propagandabirodalom: befagyott számlák, titkolt vagyon, ideges piac",
-    summary: "A hír a kormányközeli médiavállalkozások pénzügyi helyzetéről és piaci következményeiről szól. A fejlemények a propagandaipar és az állami megrendelések kapcsolatát teszik láthatóbbá.",
-    sourceName: "Kontroll.hu",
-    originalUrl: "https://kontroll.hu/cikk/belfold/2026/05/06/balasy-fele-propagandabirodalom-befagyott-szamlak-titkolt-vagyon-ideges-piac",
-    publishedAt: new Date("2026-05-06T08:00:00.000Z"),
-    categories: ["propaganda", "NER bukás"],
-    tags: ["Balásy", "média", "vagyon"],
-    persons: ["Balásy Gyula"]
-  },
-  {
-    title: "Besült Lázár János kastélyprivatizációs terve",
-    summary: "A történet egy állami vagyonhoz kapcsolódó politikai terv megtorpanását jelzi. A téma a közvagyon kezelése és a kormányzati döntéshozatal átláthatósága miatt fontos.",
-    sourceName: "Kontroll.hu",
-    originalUrl: "https://kontroll.hu/cikk/belfold/2026/05/07/besuelt-lazar-janos-kastelyprivatizacios-terve",
-    publishedAt: new Date("2026-05-07T08:00:00.000Z"),
-    categories: ["közélet", "állami tender", "NER bukás"],
-    tags: ["kastélyprivatizáció", "közvagyon"],
-    persons: ["Lázár János"]
-  },
-  {
-    title: "Orbán: A Fidesz ellenzéki szerepből nem képes megújítani a jobboldalt",
-    summary: "A cím alapján a Fidesz jövőjéről és ellenzéki szerepéről szóló politikai értékelés került nyilvánosságra. A téma a kormánypárt mozgásterét és a jobboldali politikai tér átrendeződését érinti.",
-    sourceName: "Kontroll.hu",
-    originalUrl: "https://kontroll.hu/cikk/belfold/2026/05/05/orban-a-fidesz-ellenzeki-szerepbol-nem-kepes-megujitani-a-jobboldalt",
-    publishedAt: new Date("2026-05-05T08:00:00.000Z"),
-    categories: ["közélet", "NER bukás"],
-    tags: ["Fidesz", "ellenzék", "jobboldal"],
-    persons: ["Orbán Viktor"]
-  },
-  {
-    title: "Gyanús kifizetéseket talált az ÁSZ Köves Slomóék alapítványánál",
-    summary: "A hír közpénzekkel és ellenőrzési megállapításokkal kapcsolatos gyanús pénzmozgásokról szól. Az ügy a támogatási rendszer átláthatósága miatt került a közéleti figyelembe.",
-    sourceName: "Kontroll.hu",
-    originalUrl: "https://kontroll.hu/cikk/belfold/2026/05/05/gyanus-kifizeteseket-talalt-az-asz-koeves-slomoek-alapitvanyanal",
-    publishedAt: new Date("2026-05-05T08:00:00.000Z"),
-    categories: ["korrupció", "nyomozás", "NER bukás"],
-    tags: ["ÁSZ", "alapítvány", "kifizetés"],
-    persons: ["Köves Slomó"]
-  }
-];
+const demoArticles: {
+  title: string;
+  summary: string;
+  sourceName: string;
+  originalUrl: string;
+  publishedAt: Date;
+  categories: string[];
+  tags: string[];
+  persons: string[];
+}[] = [];
 
 async function ensureName(model: "category" | "tag" | "person", name: string) {
   if (model === "category") return prisma.category.upsert({ where: { name }, create: { name }, update: {} });
@@ -111,6 +75,12 @@ async function mergeLegacyCategory(oldName: string, newName: string) {
 }
 
 export async function ensureBootstrapData() {
+  await prisma.source.deleteMany({
+    where: {
+      OR: [{ name: "Kontroll.hu" }, { homepageUrl: { contains: "kontroll.hu" } }, { feedUrl: { contains: "kontroll.hu" } }]
+    }
+  });
+
   await prisma.$executeRaw`
     UPDATE "Article"
     SET "summary" = regexp_replace("summary", '^Források szerint az ügy lényege:\\s*', '', 'i')
@@ -181,6 +151,7 @@ export async function ensureBootstrapData() {
         publishedAt: item.publishedAt,
         originalUrl: item.originalUrl,
         canonicalUrl: item.originalUrl,
+        imageUrl: null,
         titleHash: titleHash(item.title),
         contentHash: stableHash(item.summary),
         storyGroupId: storyGroup.id,

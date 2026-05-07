@@ -12,6 +12,7 @@ const dateFormatter = new Intl.DateTimeFormat("hu-HU", {
 
 <template>
   <article class="rounded border border-black/10 bg-white p-4 shadow-subtle dark:border-white/10 dark:bg-white/5">
+    <img v-if="article.imageUrl" :src="article.imageUrl" :alt="article.title" class="mb-4 aspect-[16/7] w-full rounded object-cover" loading="lazy" referrerpolicy="no-referrer" />
     <div class="flex flex-wrap items-center gap-2 text-xs text-ink-800/60 dark:text-ink-50/60">
       <span class="font-semibold text-signal-red">{{ article.source.name }}</span>
       <span>{{ dateFormatter.format(new Date(article.publishedAt)) }}</span>

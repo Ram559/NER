@@ -43,8 +43,16 @@ function localClassify(title: string, snippet?: string): AiResult {
     .filter((word) => word.length > 4)
     .slice(0, 8);
 
+  const categorySet = new Set(categories);
+  const summaryParts: string[] = [];
+  if (categorySet.has("korrupció")) summaryParts.push("Korrupciós kockázatot vagy visszaélésgyanút jelző fejlemény.");
+  if (categorySet.has("állami tender")) summaryParts.push("Állami megbízások és közpénzes döntések átláthatósága kerül előtérbe.");
+  if (categorySet.has("EU pénzek")) summaryParts.push("Az uniós források sorsa és a teljesítési feltételek adhatják az ügy tétjét.");
+  if (categorySet.has("propaganda")) summaryParts.push("A kormányközeli kommunikációs és médiarendszer működésére irányítja a figyelmet.");
+  if (categorySet.has("NER bukás") || summaryParts.length === 0) summaryParts.push("A kormányközeli szereplők politikai vagy gazdasági mozgásterét érintő történet.");
+
   return {
-    summary: compactSentences(`A hír a következő témára irányítja a figyelmet: ${title}.`, 2),
+    summary: compactSentences(summaryParts.join(" "), 2),
     categories: categories.length ? categories : ["NER bukás"],
     tags: [...new Set(words)].slice(0, 10),
     persons: extractLikelyPersons(text)

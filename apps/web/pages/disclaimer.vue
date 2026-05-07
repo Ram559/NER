@@ -11,7 +11,7 @@ useSeoMeta({ title: "Jogi tájékoztató", robots: "index,follow" });
     </p>
     <p class="mt-4 leading-7">
       Minden hírnél feltüntetjük a forrás nevét, a publikáció idejét és az eredeti URL-t. A teljes tartalom az eredeti forrásnál olvasható.
-      A rendszer tiszteletben tartja a robots.txt beállításokat, és adminisztrációs felületen keresztül bármely forrás kikapcsolható.
+      A rendszer tiszteletben tartja a robots.txt beállításokat, és csak előre konfigurált RSS vagy Google News RSS forrásokból dolgozik.
     </p>
   </section>
 </template>

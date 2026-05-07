@@ -9,7 +9,6 @@ const EnvSchema = z.object({
   API_PORT: z.coerce.number().int().positive().default(4000),
   API_PUBLIC_URL: z.string().url().default("http://localhost:4000/api"),
   WEB_PUBLIC_URL: z.string().url().default("http://localhost:3000"),
-  ADMIN_TOKEN: z.string().min(12).default("development-token"),
   CORS_ORIGIN: z.string().default("http://localhost:3000"),
   CRON_ENABLED: z.coerce.boolean().default(true),
   INITIAL_INGESTION_ENABLED: z.coerce.boolean().default(true),

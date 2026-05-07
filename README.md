@@ -27,21 +27,19 @@ AI-alapu magyar kozeleti es politikai hiraggregator Nuxt 3, Express, Prisma es P
 cp .env.example .env
 ```
 
-2. Allits be eros `ADMIN_TOKEN` erteket az `.env` fajlban.
-
-3. Inditas:
+2. Indítás:
 
 ```bash
 docker compose up --build
 ```
 
-4. Seed adatok betoltese kulon terminalbol:
+3. Seed adatok betoltese kulon terminalbol:
 
 ```bash
 docker compose exec api npm run prisma:seed --workspace @ner/api
 ```
 
-5. Megnyitas:
+4. Megnyitas:
 
 - Web: http://localhost:8080
 - API health: http://localhost:8080/api/health
@@ -68,11 +66,10 @@ docker compose up postgres
 
 - `DATABASE_URL`: PostgreSQL kapcsolat.
 - `PRETTY_LOGS`: fejleszteshez `true`, Docker production futashoz maradjon `false`.
-- `ADMIN_TOKEN`: admin API muveletekhez.
 - `CRON_ENABLED`: cron import be/ki.
 - `INITIAL_INGESTION_ENABLED`: indulas utan automatikus elso import.
 - `INGESTION_CRON`: node-cron formátum, alapból 10 percenként.
-- `AUTO_APPROVE_ARTICLES`: ha `false`, az uj hirek admin jovahagyasi sorba kerulnek.
+- `AUTO_APPROVE_ARTICLES`: ha `false`, az új hírek későbbi moderációs folyamatra váró állapotba kerülnek.
 - `OPENAI_API_KEY`: opcionalis. Ha nincs megadva, determinisztikus helyi osszegzes/kategorizalas fut.
 - `OPENAI_MODEL`: OpenAI modell neve.
 - `NUXT_PUBLIC_API_BASE`: bongeszobol hasznalt API base, Docker/Nginx alatt `/api`.
@@ -84,18 +81,7 @@ docker compose up postgres
 - `GET /api/articles/:id`: egy hir.
 - `GET /api/stats/home`: trending kategoriak, szereplok, forrasok.
 - `GET /api/stats/timeline`: 30 napos napi bontas.
-- `GET /api/sources`: RSS forrasok.
-- `POST /api/sources`: admin tokennel uj forras.
-- `POST /api/admin/ingest`: kezi import.
-- `GET /api/admin/prompts`: AI promptok.
-- `PUT /api/admin/prompts/:key`: prompt modositas.
-- `DELETE /api/admin/cache`: cache urites.
-
-Admin hivasokhoz:
-
-```http
-Authorization: Bearer <ADMIN_TOKEN>
-```
+- `GET /api/sources`: aktív RSS források.
 
 ## Kezdo RSS forrasok
 
@@ -104,8 +90,8 @@ A rendszer indulasakor automatikusan letrehozza az indulasi listat:
 - Telex: `https://telex.hu/rss`
 - 24.hu Belfold: `https://24.hu/belfold/feed/`
 - 444: `https://444.hu/feed/`
-- Kontroll.hu: nincs publikus RSS/Atom alternate link; a rendszer a kezdolap cikklinkjeibol csak cimet, URL-t es datumot olvas ki.
 - Google News RSS pelda: NER bukas, korrupcio, Balasy, Fidesz keresokifejezesek.
+- Reddit r/hungary kereső RSS: NER, Orbán, Rogán, korrupció, közbeszerzés, EU pénzek, propaganda és állami tender kulcsszavak.
 
 Ezek indulasi konfiguraciok. Production hasznalat elott ellenorizd a kiadok aktualis RSS dokumentaciojat es felhasznalasi felteteleit.
 
@@ -135,7 +121,7 @@ Use only the title and RSS snippet. Never invent unsupported facts.
 
 ## Bovithetoseg
 
-- Uj forras: admin panel vagy `Source` seed bovitese.
+- Uj forras: `apps/api/src/services/bootstrap.ts` seed bovitese.
 - Uj kategoria: seed vagy AI prompt frissites.
 - Mas AI provider: `apps/api/src/services/ai.ts`.
 - Mas deduplikacio: `apps/api/src/services/dedupe.ts`.

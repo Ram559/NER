@@ -44,6 +44,7 @@ model Article {
   publishedAt  DateTime
   originalUrl  String        @unique
   canonicalUrl String?
+  imageUrl     String?
   titleHash    String
   contentHash  String?
   status       ArticleStatus @default(APPROVED)
@@ -117,14 +118,6 @@ model IngestionRun {
   rejectedCount  Int      @default(0)
   errorCount     Int      @default(0)
   notes          String?
-}
-
-model AdminAction {
-  id        String   @id @default(cuid())
-  action    String
-  targetId  String?
-  metadata  Json?
-  createdAt DateTime @default(now())
 }
 
 model CacheEntry {

@@ -9,7 +9,6 @@ import { healthRouter } from "./routes/health.js";
 import { articlesRouter } from "./routes/articles.js";
 import { sourcesRouter } from "./routes/sources.js";
 import { statsRouter } from "./routes/stats.js";
-import { adminRouter } from "./routes/admin.js";
 import { sitemapRouter } from "./routes/sitemap.js";
 import { refreshRouter } from "./routes/refresh.js";
 import { errorHandler, notFound } from "./middleware/error.js";
@@ -40,7 +39,6 @@ export function createApp() {
   app.use("/api/articles", articlesRouter);
   app.use("/api/sources", sourcesRouter);
   app.use("/api/stats", statsRouter);
-  app.use("/api/admin", adminRouter);
   app.use("/api/refresh", refreshRouter);
   app.use("/api/sitemap.xml", sitemapRouter);
 

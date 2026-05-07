@@ -3,32 +3,9 @@ import type { HomeStats, TimelinePoint } from "~/types/api";
 
 const props = defineProps<{ stats?: HomeStats | null; timeline?: TimelinePoint[] | null }>();
 
-const selectedWindow = ref<7 | 14 | 30>(30);
-const windows = [7, 14, 30] as const;
-
-const sortedTimeline = computed(() =>
-  [...(props.timeline ?? [])].sort((left, right) => new Date(left.day).getTime() - new Date(right.day).getTime())
-);
-
-const currentPoints = computed(() => sortedTimeline.value.slice(-selectedWindow.value));
-const previousPoints = computed(() => sortedTimeline.value.slice(-selectedWindow.value * 2, -selectedWindow.value));
-const currentCount = computed(() => currentPoints.value.reduce((sum, point) => sum + point.count, 0));
-const previousCount = computed(() => previousPoints.value.reduce((sum, point) => sum + point.count, 0));
-const categorySignal = computed(() => props.stats?.trendingCategories.reduce((sum, item) => sum + item._count.articles, 0) ?? 0);
-
-const meterScore = computed(() => {
-  const acceleration = Math.max(0, currentCount.value - previousCount.value);
-  const raw = currentCount.value * 7 + acceleration * 5 + categorySignal.value * 2;
-  return Math.max(0, Math.min(100, Math.round(raw)));
-});
-
+const meterScore = computed(() => props.stats?.barometer?.score ?? 0);
 const needleRotation = computed(() => -90 + meterScore.value * 1.8);
-const meterLabel = computed(() => {
-  if (meterScore.value >= 75) return "forrpont";
-  if (meterScore.value >= 45) return "gyorsuló";
-  if (meterScore.value >= 20) return "figyelendő";
-  return "csendes";
-});
+const meterLabel = computed(() => props.stats?.barometer?.level ?? "csendes");
 </script>
 
 <template>
@@ -65,21 +42,10 @@ const meterLabel = computed(() => {
     <section class="rounded border border-black/10 bg-white p-4 dark:border-white/10 dark:bg-white/5">
       <div class="flex items-start justify-between gap-3">
         <div>
-          <h2 class="text-sm font-black uppercase tracking-normal text-ink-800/70 dark:text-ink-50/70">Bukás-méter</h2>
-          <p class="mt-1 text-xs text-ink-800/60 dark:text-ink-50/60">Aktivitás az utóbbi {{ selectedWindow }} nap alapján</p>
+          <h2 class="text-sm font-black uppercase tracking-normal text-ink-800/70 dark:text-ink-50/70">Barom-éter</h2>
+          <p class="mt-1 text-xs text-ink-800/60 dark:text-ink-50/60">Súlyozott politikai jelzés az utóbbi 30 napból</p>
         </div>
-        <div class="flex rounded border border-black/10 p-0.5 dark:border-white/10">
-          <button
-            v-for="windowSize in windows"
-            :key="windowSize"
-            type="button"
-            class="focus-ring rounded px-2 py-1 text-xs font-bold"
-            :class="selectedWindow === windowSize ? 'bg-signal-red text-white' : 'hover:bg-black/5 dark:hover:bg-white/10'"
-            @click="selectedWindow = windowSize"
-          >
-            {{ windowSize }}n
-          </button>
-        </div>
+        <span class="rounded bg-signal-red px-2 py-1 text-xs font-black uppercase tracking-normal text-white">{{ meterLabel }}</span>
       </div>
 
       <div class="mt-4 rounded bg-black/[0.03] p-4 dark:bg-white/[0.04]">
@@ -97,29 +63,36 @@ const meterLabel = computed(() => {
               stroke="currentColor"
               stroke-width="4"
               stroke-linecap="round"
-              class="origin-[100px_100px] text-ink-900 transition-transform duration-500 dark:text-ink-50"
+              class="origin-[100px_100px] text-ink-900 transition-transform duration-700 ease-out dark:text-ink-50"
               :style="{ transform: `rotate(${needleRotation}deg)` }"
             />
             <circle cx="100" cy="100" r="7" fill="currentColor" class="text-ink-900 dark:text-ink-50" />
           </svg>
           <div class="absolute inset-x-0 bottom-0 text-center">
             <p class="text-3xl font-black">{{ meterScore }}</p>
-            <p class="text-xs font-bold uppercase tracking-normal text-signal-red">{{ meterLabel }}</p>
+            <p class="text-xs font-bold uppercase tracking-normal text-signal-red">súlyozott érték</p>
           </div>
         </div>
 
         <div class="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
           <div class="rounded border border-black/10 p-2 dark:border-white/10">
-            <p class="font-black">{{ currentCount }}</p>
+            <p class="font-black">{{ stats?.barometer?.articleCount ?? 0 }}</p>
             <p class="text-ink-800/60 dark:text-ink-50/60">hír</p>
           </div>
           <div class="rounded border border-black/10 p-2 dark:border-white/10">
-            <p class="font-black">{{ Math.max(0, currentCount - previousCount) }}</p>
-            <p class="text-ink-800/60 dark:text-ink-50/60">gyorsulás</p>
+            <p class="font-black">{{ stats?.barometer?.weightedSignal ?? 0 }}</p>
+            <p class="text-ink-800/60 dark:text-ink-50/60">súly</p>
           </div>
           <div class="rounded border border-black/10 p-2 dark:border-white/10">
-            <p class="font-black">{{ categorySignal }}</p>
-            <p class="text-ink-800/60 dark:text-ink-50/60">jelzés</p>
+            <p class="font-black">{{ stats?.barometer?.topSignals?.length ?? 0 }}</p>
+            <p class="text-ink-800/60 dark:text-ink-50/60">erős jel</p>
+          </div>
+        </div>
+
+        <div v-if="stats?.barometer?.topSignals?.length" class="mt-4 space-y-2">
+          <div v-for="signal in stats.barometer.topSignals" :key="signal.label" class="flex items-center justify-between gap-3 rounded border border-black/10 px-2 py-1.5 text-xs dark:border-white/10">
+            <span class="truncate">{{ signal.label }}</span>
+            <span class="font-black text-signal-red">+{{ signal.weight }}</span>
           </div>
         </div>
       </div>

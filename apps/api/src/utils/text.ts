@@ -72,6 +72,8 @@ export function stripSummaryBoilerplate(value: string | null | undefined): strin
   const cleaned = cleanText(value)
     .replace(/^Források szerint az ügy lényege:\s*/i, "")
     .replace(/^Forrasok szerint az ugy lenyege:\s*/i, "")
+    .replace(/^A hír a következő témára irányítja a figyelmet:\s*/i, "")
+    .replace(/^A hir a kovetkezo temara iranyitja a figyelmet:\s*/i, "")
     .trim();
   return cleaned || null;
 }

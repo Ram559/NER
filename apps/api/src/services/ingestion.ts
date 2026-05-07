@@ -115,6 +115,7 @@ async function importItem(source: Source, item: FeedItem): Promise<"imported" | 
         publishedAt: item.publishedAt,
         originalUrl: item.link,
         canonicalUrl,
+        imageUrl: item.imageUrl,
         titleHash: titleHash(item.title),
         contentHash: stableHash(`${item.title} ${item.snippet ?? ""}`),
         status: env.AUTO_APPROVE_ARTICLES ? ArticleStatus.APPROVED : ArticleStatus.PENDING,

@@ -3,21 +3,9 @@ import { logger } from "../config/logger.js";
 import { titleHash } from "./dedupe.js";
 import { prisma } from "./prisma.js";
 import { keywordFingerprint, stableHash } from "../utils/text.js";
+import { visibleCategoryNames } from "../utils/categories.js";
 
-const defaultCategories = [
-  "korrupció",
-  "közbeszerzés",
-  "EU pénzek",
-  "lemondás",
-  "nyomozás",
-  "állami tender",
-  "oligarcha",
-  "propaganda",
-  "gazdaság",
-  "média",
-  "közélet",
-  "NER bukás"
-];
+const defaultCategories = visibleCategoryNames();
 
 const defaultSources = [
   { name: "Telex", homepageUrl: "https://telex.hu", feedUrl: "https://telex.hu/rss", type: SourceType.RSS },
@@ -40,16 +28,16 @@ Return strict JSON only:
   "tags": ["lowercase topical tags"],
   "persons": ["Full Name"]
 }
-Use only the title and RSS snippet. Never invent facts not supported by the input. Prefer categories: korrupció, közbeszerzés, EU pénzek, lemondás, nyomozás, állami tender, oligarcha, propaganda, gazdaság, média, NER bukás.`;
+Use only the title and RSS snippet. Never invent facts not supported by the input. Never start the summary with "Források szerint az ügy lényege". Use only these categories: NER bukás, EU pénzek, korrupció, állami tender, propaganda.`;
 
 const demoArticles = [
   {
     title: "Konkrét példán mutatta be egy állami cég vezetője, hogy hatszoros áron dolgoztak Balásyék",
-    summary: "Források szerint az ügy állami megbízások árazását és a kormányközeli kommunikációs piac működését érinti. A történet a közpénzek felhasználása és az elszámoltatás miatt került fókuszba.",
+    summary: "A hír állami megbízások árazását és a kormányközeli kommunikációs piac működését érinti. A történet a közpénzek felhasználása és az elszámoltatás miatt került fókuszba.",
     sourceName: "Kontroll.hu",
     originalUrl: "https://kontroll.hu/cikk/belfold/2026/05/06/konkret-peldan-mutatta-be-egy-allami-ceg-vezetoje-hogy-hatszoros-aron-dolgoztak-balasyek",
     publishedAt: new Date("2026-05-06T08:00:00.000Z"),
-    categories: ["állami tender", "propaganda", "közbeszerzés", "NER bukás"],
+    categories: ["állami tender", "propaganda", "NER bukás"],
     tags: ["Balásy", "közpénz", "állami cég"],
     persons: ["Balásy Gyula"]
   },
@@ -59,7 +47,7 @@ const demoArticles = [
     sourceName: "Kontroll.hu",
     originalUrl: "https://kontroll.hu/cikk/belfold/2026/05/06/balasy-fele-propagandabirodalom-befagyott-szamlak-titkolt-vagyon-ideges-piac",
     publishedAt: new Date("2026-05-06T08:00:00.000Z"),
-    categories: ["propaganda", "gazdaság", "NER bukás"],
+    categories: ["propaganda", "NER bukás"],
     tags: ["Balásy", "média", "vagyon"],
     persons: ["Balásy Gyula"]
   },
@@ -123,6 +111,17 @@ async function mergeLegacyCategory(oldName: string, newName: string) {
 }
 
 export async function ensureBootstrapData() {
+  await prisma.$executeRaw`
+    UPDATE "Article"
+    SET "summary" = regexp_replace("summary", '^Források szerint az ügy lényege:\\s*', '', 'i')
+    WHERE "summary" IS NOT NULL
+  `;
+  await prisma.$executeRaw`
+    UPDATE "Article"
+    SET "summary" = regexp_replace("summary", '^Forrasok szerint az ugy lenyege:\\s*', '', 'i')
+    WHERE "summary" IS NOT NULL
+  `;
+
   await mergeLegacyCategory("korrupcio", "korrupció");
   await mergeLegacyCategory("kozbeszerzes", "közbeszerzés");
   await mergeLegacyCategory("EU penzek", "EU pénzek");

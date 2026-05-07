@@ -67,6 +67,15 @@ export function compactSentences(value: string, maxSentences = 2): string {
   return parts.slice(0, maxSentences).join(" ").slice(0, 650);
 }
 
+export function stripSummaryBoilerplate(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const cleaned = cleanText(value)
+    .replace(/^Források szerint az ügy lényege:\s*/i, "")
+    .replace(/^Forrasok szerint az ugy lenyege:\s*/i, "")
+    .trim();
+  return cleaned || null;
+}
+
 export function canonicalizeUrl(url: string): string {
   const parsed = new URL(url);
   ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "fbclid", "gclid"].forEach((key) =>

@@ -2,6 +2,8 @@ import { Router } from "express";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "../services/prisma.js";
+import { isVisibleCategory } from "../utils/categories.js";
+import { stripSummaryBoilerplate } from "../utils/text.js";
 
 export const articlesRouter = Router();
 
@@ -24,6 +26,14 @@ function articleInclude() {
     persons: { select: { name: true } },
     storyGroup: { select: { id: true, title: true } }
   } satisfies Prisma.ArticleInclude;
+}
+
+function presentArticle<T extends { summary: string | null; categories: { name: string }[] }>(article: T) {
+  return {
+    ...article,
+    summary: stripSummaryBoilerplate(article.summary),
+    categories: article.categories.filter((category) => isVisibleCategory(category.name))
+  };
 }
 
 articlesRouter.get("/", async (req, res) => {
@@ -62,7 +72,7 @@ articlesRouter.get("/", async (req, res) => {
     prisma.article.count({ where })
   ]);
 
-  res.json({ items, total, page: query.page, limit: query.limit });
+  res.json({ items: items.map(presentArticle), total, page: query.page, limit: query.limit });
 });
 
 articlesRouter.get("/:id", async (req, res) => {
@@ -72,5 +82,5 @@ articlesRouter.get("/:id", async (req, res) => {
   });
 
   if (!article) return res.status(404).json({ error: "Article not found" });
-  res.json(article);
+  res.json(presentArticle(article));
 });

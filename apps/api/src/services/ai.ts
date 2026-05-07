@@ -1,32 +1,17 @@
 import OpenAI from "openai";
 import { env } from "../config/env.js";
-import { compactSentences, cleanText } from "../utils/text.js";
+import { visibleCategoryNames } from "../utils/categories.js";
+import { compactSentences, cleanText, stripSummaryBoilerplate } from "../utils/text.js";
 import { prisma } from "./prisma.js";
 
-const DEFAULT_CATEGORIES = [
-  "korrupció",
-  "közbeszerzés",
-  "EU pénzek",
-  "lemondás",
-  "nyomozás",
-  "állami tender",
-  "oligarcha",
-  "propaganda",
-  "gazdaság",
-  "média"
-];
+const DEFAULT_CATEGORIES = visibleCategoryNames();
 
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  korrupció: ["korrupcio", "kenopenz", "visszaeles", "hutlen kezeles"],
-  közbeszerzés: ["kozbeszerzes", "beszerzes", "tender"],
+  "NER bukás": ["ner", "fidesz", "buk", "elszamoltatas", "vagyonvisszaszerzes", "balasy", "lazar", "orban"],
   "EU pénzek": ["eu penz", "unios", "brusszel", "helyreallitasi alap"],
-  lemondás: ["lemond", "tavozik", "meneszt"],
-  nyomozás: ["nyomoz", "ugyeszseg", "rendőrség", "gyanu"],
-  "állami tender": ["allami", "tender", "megbizas"],
-  oligarcha: ["oligarcha", "milliardos", "vallalkozo"],
-  propaganda: ["propaganda", "kampany", "plakat", "media"],
-  gazdaság: ["gazdasag", "inflacio", "koltsegvetes", "forint", "ado"],
-  média: ["media", "sajto", "televizio", "radio"]
+  korrupció: ["korrupcio", "kenopenz", "visszaeles", "hutlen kezeles", "gyanus"],
+  "állami tender": ["allami", "tender", "megbizas", "kozbeszerzes", "beszerzes"],
+  propaganda: ["propaganda", "kampany", "plakat", "media"]
 };
 
 export type AiResult = {
@@ -59,8 +44,8 @@ function localClassify(title: string, snippet?: string): AiResult {
     .slice(0, 8);
 
   return {
-    summary: compactSentences(`Források szerint az ügy lényege: ${title}.`, 2),
-    categories: categories.length ? categories : ["közélet"],
+    summary: compactSentences(`A hír a következő témára irányítja a figyelmet: ${title}.`, 2),
+    categories: categories.length ? categories : ["NER bukás"],
     tags: [...new Set(words)].slice(0, 10),
     persons: extractLikelyPersons(text)
   };
@@ -72,7 +57,7 @@ export async function analyzeArticle(title: string, snippet?: string): Promise<A
   const prompt = await prisma.aiPrompt.findUnique({ where: { key: "article-analysis" } });
   const systemPrompt =
     prompt?.content ??
-    `You analyze Hungarian public affairs news. Return strict JSON with summary, categories, tags and persons. The summary must be original, Hungarian, maximum two short sentences, and must not copy the source text. Prefer these categories: ${DEFAULT_CATEGORIES.join(", ")}.`;
+    `You analyze Hungarian public affairs news. Return strict JSON with summary, categories, tags and persons. The summary must be original, Hungarian, maximum two short sentences, and must not copy the source text. Never start the summary with "Források szerint az ügy lényege". Use only these categories: ${DEFAULT_CATEGORIES.join(", ")}.`;
 
   const client = new OpenAI({ apiKey: env.OPENAI_API_KEY });
   const response = await client.chat.completions.create({
@@ -98,7 +83,7 @@ export async function analyzeArticle(title: string, snippet?: string): Promise<A
   try {
     const parsed = JSON.parse(content) as Partial<AiResult>;
     return {
-      summary: compactSentences(parsed.summary ?? "", 2) || localClassify(title, snippet).summary,
+      summary: stripSummaryBoilerplate(compactSentences(parsed.summary ?? "", 2)) || localClassify(title, snippet).summary,
       categories: parsed.categories?.slice(0, 5) ?? [],
       tags: parsed.tags?.slice(0, 12) ?? [],
       persons: parsed.persons?.slice(0, 10) ?? []

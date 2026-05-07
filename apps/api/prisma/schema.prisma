@@ -1,0 +1,135 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SourceType {
+  RSS
+  GOOGLE_NEWS_RSS
+  API
+}
+
+enum ArticleStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Source {
+  id            String         @id @default(cuid())
+  name          String
+  homepageUrl   String
+  feedUrl       String         @unique
+  type          SourceType     @default(RSS)
+  enabled       Boolean        @default(true)
+  respectRobots Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  articles      Article[]
+
+  @@index([enabled, type])
+}
+
+model Article {
+  id           String        @id @default(cuid())
+  title        String
+  summary      String?       @db.VarChar(700)
+  sourceId     String
+  source       Source        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  publishedAt  DateTime
+  originalUrl  String        @unique
+  canonicalUrl String?
+  titleHash    String
+  contentHash  String?
+  status       ArticleStatus @default(APPROVED)
+  storyGroupId String?
+  storyGroup   StoryGroup?   @relation(fields: [storyGroupId], references: [id], onDelete: SetNull)
+  categories   Category[]
+  tags         Tag[]
+  persons      Person[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([publishedAt])
+  @@index([sourceId, publishedAt])
+  @@index([status, publishedAt])
+  @@index([titleHash])
+}
+
+model StoryGroup {
+  id          String    @id @default(cuid())
+  fingerprint String    @unique
+  title       String
+  articles    Article[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  articles  Article[]
+  createdAt DateTime  @default(now())
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  articles  Article[]
+  createdAt DateTime  @default(now())
+}
+
+model Person {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  articles  Article[]
+  createdAt DateTime  @default(now())
+}
+
+model BlocklistKeyword {
+  id        String   @id @default(cuid())
+  keyword   String   @unique
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AiPrompt {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model IngestionRun {
+  id             String   @id @default(cuid())
+  startedAt      DateTime @default(now())
+  finishedAt     DateTime?
+  sourceCount    Int      @default(0)
+  importedCount  Int      @default(0)
+  duplicateCount Int      @default(0)
+  rejectedCount  Int      @default(0)
+  errorCount     Int      @default(0)
+  notes          String?
+}
+
+model AdminAction {
+  id        String   @id @default(cuid())
+  action    String
+  targetId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+model CacheEntry {
+  key       String   @id
+  value     Json
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

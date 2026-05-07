@@ -1,0 +1,23 @@
+{
+  "name": "magyar-politikai-hiraggregator",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AI-alapu magyar kozeleti es politikai hiraggregator Nuxt, Express, Prisma es PostgreSQL alapon.",
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @ner/api",
+    "dev:api": "npm run dev --workspace @ner/api",
+    "dev:web": "npm run dev --workspace @ner/web",
+    "build": "npm run build --workspace @ner/api && npm run build --workspace @ner/web",
+    "lint": "npm run lint --workspace @ner/api && npm run lint --workspace @ner/web",
+    "db:generate": "npm run prisma:generate --workspace @ner/api",
+    "db:migrate": "npm run prisma:migrate --workspace @ner/api",
+    "db:seed": "npm run prisma:seed --workspace @ner/api"
+  },
+  "engines": {
+    "node": ">=20.11"
+  }
+}

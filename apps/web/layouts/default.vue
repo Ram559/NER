@@ -11,7 +11,6 @@
         </NuxtLink>
         <nav class="flex items-center gap-2 text-sm">
           <NuxtLink class="focus-ring rounded px-3 py-2 hover:bg-black/5 dark:hover:bg-white/10" to="/search">Keresés</NuxtLink>
-          <NuxtLink class="focus-ring rounded px-3 py-2 hover:bg-black/5 dark:hover:bg-white/10" to="/admin">Admin</NuxtLink>
           <ThemeToggle />
         </nav>
       </div>

@@ -13,10 +13,10 @@ const EnvSchema = z.object({
   CORS_ORIGIN: z.string().default("http://localhost:3000"),
   CRON_ENABLED: z.coerce.boolean().default(true),
   INITIAL_INGESTION_ENABLED: z.coerce.boolean().default(true),
-  INGESTION_CRON: z.string().default("0 * * * *"),
+  INGESTION_CRON: z.string().default("*/10 * * * *"),
   INGESTION_CONCURRENCY: z.coerce.number().int().positive().default(6),
   AUTO_APPROVE_ARTICLES: z.coerce.boolean().default(true),
-  PUBLIC_REFRESH_ENABLED: z.coerce.boolean().default(true),
+  PUBLIC_REFRESH_ENABLED: z.coerce.boolean().default(false),
   POLITICAL_FILTER_ENABLED: z.coerce.boolean().default(true),
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_MODEL: z.string().default("gpt-4.1-mini")

@@ -23,6 +23,8 @@ services:
     environment:
       NODE_ENV: production
       PRETTY_LOGS: "false"
+      INGESTION_CRON: "*/10 * * * *"
+      PUBLIC_REFRESH_ENABLED: "false"
       DATABASE_URL: postgresql://${POSTGRES_USER:-ner}:${POSTGRES_PASSWORD:-ner_password}@postgres:5432/${POSTGRES_DB:-ner_news}?schema=public
     depends_on:
       postgres:

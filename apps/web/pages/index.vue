@@ -14,9 +14,6 @@ const [{ data: articles }, { data: stats }, { data: timeline }] = await Promise.
   useApiFetch<TimelinePoint[]>("/stats/timeline")
 ]);
 
-async function refreshHome() {
-  await refreshNuxtData();
-}
 </script>
 
 <template>
@@ -29,18 +26,15 @@ async function refreshHome() {
             NER-bukáshoz köthető hírek valós idejű, rendszerezett gyűjteménye, rövid AI-összefoglalókkal és eredeti forráslinkekkel.
           </p>
         </div>
-        <div class="flex flex-col gap-3 sm:items-end">
-          <RefreshNewsButton @done="refreshHome" />
-          <NuxtLink to="/search" class="focus-ring inline-flex items-center gap-2 rounded bg-signal-red px-4 py-2 text-sm font-bold text-white">
-            <Search class="h-4 w-4" />
-            Keresés
-          </NuxtLink>
-        </div>
+        <NuxtLink to="/search" class="focus-ring inline-flex items-center gap-2 rounded bg-signal-red px-4 py-2 text-sm font-bold text-white">
+          <Search class="h-4 w-4" />
+          Keresés
+        </NuxtLink>
       </div>
       <div class="space-y-4">
         <ArticleCard v-for="article in articles?.items" :key="article.id" :article="article" />
         <p v-if="!articles?.items.length" class="rounded border border-black/10 bg-white p-6 text-sm dark:border-white/10 dark:bg-white/5">
-          Még nincs importált hír. Használd a frissítés gombot, vagy indíts kézi frissítést az admin felületen.
+          Még nincs importált hír. A rendszer 10 percenként automatikusan frissít.
         </p>
       </div>
     </section>

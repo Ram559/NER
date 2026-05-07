@@ -8,7 +8,7 @@ AI-alapu magyar kozeleti es politikai hiraggregator Nuxt 3, Express, Prisma es P
 - Csak minimalis metaadatot tarol: cim, max ket mondatos AI-osszefoglalo, forras, datum, eredeti URL, kategoriak, cimkek es szereplok.
 - Minden cikk az eredeti forrasra mutat.
 - URL, cim-hash es fuzzy cim-egyezes alapjan szuri a duplikatumokat.
-- Orankenti cron importot futtat, kezzel is indithato adminbol.
+- 10 percenként automatikus cron importot futtat.
 - SSR frontend, sitemap, robots.txt, OpenGraph meta es canonical-baratra kesz struktura.
 
 ## Stack
@@ -71,7 +71,7 @@ docker compose up postgres
 - `ADMIN_TOKEN`: admin API muveletekhez.
 - `CRON_ENABLED`: cron import be/ki.
 - `INITIAL_INGESTION_ENABLED`: indulas utan automatikus elso import.
-- `INGESTION_CRON`: node-cron formatum, alapbol orankent.
+- `INGESTION_CRON`: node-cron formátum, alapból 10 percenként.
 - `AUTO_APPROVE_ARTICLES`: ha `false`, az uj hirek admin jovahagyasi sorba kerulnek.
 - `OPENAI_API_KEY`: opcionalis. Ha nincs megadva, determinisztikus helyi osszegzes/kategorizalas fut.
 - `OPENAI_MODEL`: OpenAI modell neve.
@@ -109,7 +109,7 @@ A rendszer indulasakor automatikusan letrehozza az indulasi listat:
 
 Ezek indulasi konfiguraciok. Production hasznalat elott ellenorizd a kiadok aktualis RSS dokumentaciojat es felhasznalasi felteteleit.
 
-A kezdolapon a `Friss hirek leszedese` gomb a `POST /api/refresh` vegpontot hivja. Ugyanez orankent automatikusan fut a cron schedulerrel, es indulas utan egyszer hatterben is lefut.
+A frissítés 10 percenként automatikusan fut a cron schedulerrel, és indulás után egyszer háttérben is lefut. A publikus kézi frissítés alapértelmezetten ki van kapcsolva.
 
 ## AI prompt pelda
 

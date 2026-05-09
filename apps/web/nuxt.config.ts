@@ -16,6 +16,7 @@ export default defineNuxtConfig({
       titleTemplate: "%s | NER Bukás Monitor",
       meta: [
         { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { name: "google-adsense-account", content: "ca-pub-7836000916356774" },
         {
           name: "description",
           content: "AI-alapú magyar közéleti és politikai híraggregátor eredeti forráslinkekkel."
